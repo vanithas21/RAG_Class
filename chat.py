@@ -1,5 +1,4 @@
-mport os
-
+import os
 import chromadb
 
 import streamlit as st
@@ -200,56 +199,69 @@ QUESTION
 
 # ============================================================
 
-if "messages" not in st.session_state:
+def main():
 
-    st.session_state.messages = []
+    print()
+    print("=" * 50)
+    print("             MINI RAG")
+    print("=" * 50)
 
-for msg in st.session_state.messages:
+    print("Type 'exit' to quit.")
 
-    with st.chat_message(msg["role"]):
+    while True:
 
-        st.write(msg["content"])
+        question = input("\nAsk: ")
 
-        if msg["role"] == "assistant" and msg.get("sources"):
+        if question.strip().lower() == "exit":
 
-            with st.expander("Sources"):
+            print("Goodbye!")
 
-                for s in msg["sources"]:
+            break
 
-                    st.write(f"- {s['source']} (chunk {s['chunk']})")
+        if not question.strip():
 
-question = st.chat_input("Ask a question about your documents")
+            continue
 
-if question:
 
-    st.session_state.messages.append({"role": "user", "content": question})
+        # Retrieve
+        documents, metadatas = retrieve_documents(
+            question
+        )
 
-    with st.chat_message("user"):
 
-        st.write(question)
+        # Show sources
+        print()
+        print("Retrieved sources:")
 
-    with st.chat_message("assistant"):
+        for metadata in metadatas:
 
-        with st.spinner("Thinking..."):
+            print(
+                f"- {metadata['source']} "
+                f"(chunk {metadata['chunk']})"
+            )
 
-            documents, metadatas = retrieve_documents(question)
 
-            answer = generate_answer(question, documents, metadatas)
+        # Generate
+        print()
+        print("Thinking...")
 
-        st.write(answer)
+        answer = generate_answer(
+            question,
+            documents,
+            metadatas
+        )
 
-        with st.expander("Sources"):
 
-            for m in metadatas:
+        # Answer
+        print()
+        print("Answer:")
+        print(answer)
 
-                st.write(f"- {m['source']} (chunk {m['chunk']})")
 
-    st.session_state.messages.append({
+# ============================================================
+# 8. Start
+# ============================================================
 
-        "role": "assistant",
+if __name__ == "__main__":
 
-        "content": answer,
-
-        "sources": metadatas
-
-    })
+    main()
